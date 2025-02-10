@@ -1,4 +1,4 @@
-# IRbaby-Firmware
+# IRbaby-mod
 
 ## 编译状态
 [![Build Status](https://www.travis-ci.org/Caffreyfans/IRbaby-firmware.svg?branch=master)](https://www.travis-ci.org/Caffreyfans/IRbaby-firmware)
@@ -12,3 +12,7 @@
 - [x] IRext
 - [x] IRsend
 - [x] IRreceive
+
+## 未修复的问题
+- LED 不能点亮
+- 按键 不能重置
