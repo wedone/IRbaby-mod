@@ -54,12 +54,12 @@ typedef unsigned char uint8_t;
 #define RESET_PIN 4
 #define LED_PIN   15
 /* 315 RF pin */
-#define T_315 5
-#define R_315 4
+#define T_315 14
+#define R_315 5
 
 /* 433 RF pin */
 #define T_433 14
-#define R_433 12
+#define R_433 5
 
 /* IR pin */
 #define T_IR 14
