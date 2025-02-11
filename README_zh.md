@@ -1,4 +1,4 @@
-# IRbaby-Firmware
+# IRbaby-mod
 
 ## 编译状态
 [![Build Status](https://www.travis-ci.org/Caffreyfans/IRbaby-firmware.svg?branch=master)](https://www.travis-ci.org/Caffreyfans/IRbaby-firmware)
