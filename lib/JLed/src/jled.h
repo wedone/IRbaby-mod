@@ -41,10 +41,10 @@ namespace jled {using JLedHalType = PicoHal;}
 #elif defined(__MBED__) && !defined(ARDUINO_API_VERSION)
 #include "mbed_hal.h"  // NOLINT
 namespace jled {using JLedHalType = MbedHal;}
-#elif defined(ESP32)
+#elif ESP32
 #include "esp32_hal.h"  // NOLINT
 namespace jled {using JLedHalType = Esp32Hal;}
-#elif defined(ESP8266)
+#elif ESP8266
 #include "esp8266_hal.h"  // NOLINT
 namespace jled {using JLedHalType = Esp8266Hal;}
 #else
@@ -58,8 +58,8 @@ class JLed : public TJLed<JLedHalType, JLed> {
 };
 
 // a group of JLed objects which can be controlled simultanously
-class JLedSequence : public TJLedSequence<JLed, JLedSequence> {
-    using TJLedSequence<JLed, JLedSequence>::TJLedSequence;
+class JLedSequence : public TJLedSequence<JLed> {
+    using TJLedSequence<JLed>::TJLedSequence;
 };
 
 };  // namespace jled

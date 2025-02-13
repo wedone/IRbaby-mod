@@ -1,22 +1,20 @@
 # use this makefile to build with platformio
 #
-.PHONY: phony 
+.PHONY: all clean upload monitor lint test ci
 
 # some of the examples use LED_BUILTIN which is not defined for ESP32
 CIOPTS=--board=uno --board=esp01 --board=nano33ble --lib="src"
 CIOPTS_MBED=--board=nucleo_f401re -Oframework=mbed --lib="src"
 CIOPTSALL=--board=esp32dev --board=uno --board=nano33ble --board=esp01 --lib="src"
 
-all: phony
+all:
 	pio run
 
-lint: phony
-	cpplint --filter -readability/check \
-		    --exclude test/catch2 \
-		    --extensions=cpp,h,ino $(shell find . -maxdepth 3 \( ! -regex '.*/\..*' \) \
+lint:
+	cpplint --extensions=cpp,h,ino $(shell find .  -maxdepth 3 \( ! -regex '.*/\..*' \) \
 		       -type f -a \( -name "*\.cpp" -o -name "*\.h" -o -name "*\.ino" \) )
 
-ci: phony
+ci:
 	pio ci $(CIOPTS) examples/custom_hal/custom_hal.ino
 	pio ci $(CIOPTS_MBED) examples/multiled_mbed/multiled_mbed.cpp
 	pio ci $(CIOPTS) --lib="examples/morse" examples/morse/morse.ino
@@ -29,22 +27,21 @@ ci: phony
 	pio ci $(CIOPTSALL) examples/fade_on/fade_on.ino
 	pio ci $(CIOPTSALL) examples/sequence/sequence.ino
 
-envdump: phony
+envdump:
 	-pio run --target envdump
 
-clean: phony
+clean:
 	-pio run --target clean
-	cd test && make clean
-	rm -f src/{*.o,*.gcno,*.gcda}
+	rm -f {test,src}/{*.o,*.gcno,*.gcda}
 
-upload: phony
+upload:
 	pio run --target upload
 
-monitor: phony
+monitor:
 	pio device monitor
 
-test: phony
+test:
 	$(MAKE) -C test coverage OPT=-O0
 
-tags: phony
+tags:
 	ctags -R

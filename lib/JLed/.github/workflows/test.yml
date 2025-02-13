@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: install python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.11'
+        python-version: '3.8'
 
     - name: linter
       run: |
@@ -28,16 +28,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: install python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.11'
+        python-version: '3.8'
 
     - name: install tools
       run: |
-        pip install platformio==6.1.10
+        pip install platformio==5.0.3
         sudo apt-get update && sudo apt-get install -y lcov
 
     - name: run tests
@@ -47,10 +47,11 @@ jobs:
         make clean coverage OPT=-O0
 
     - name: Upload coverage to coveralls
-      uses: coverallsapp/github-action@v2.2.3
+      uses: coverallsapp/github-action@v1.1.2
       with:
         github-token: ${{ secrets.github_token }}
-        file: test/coverage.lcov
+        path-to-lcov: test/coverage.info
 
     - name: build examples
       run: make ci
+

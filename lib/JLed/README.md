@@ -1,8 +1,3 @@
-<table><tr><td> 
-<b>Preferring Python?</b> I just released <a href="https://github.com/jandelgado/jled-circuitpython">jled-circuitpython</a>, 
-a JLed implementation for CircuitPython and MicroPython.
-</td></tr></table>
-
 # JLed - Advanced LED Library
 
 ![run tests](https://github.com/jandelgado/jled/workflows/run%20tests/badge.svg)
@@ -15,17 +10,9 @@ control LEDs in simple (**on**/**off**) and complex (**blinking**,
 JLed got some [coverage on Hackaday](https://hackaday.com/2018/06/13/simplifying-basic-led-effects/)
 and someone did a [video tutorial for JLed](https://youtu.be/x5V2vdpZq1w)  - Thanks!
 
-<table>
- <tr>
-  <th>JLed in action</th>
-  <th>Interactive JLed playground</th>
- </tr>
-<tr>
-  <td><a href="examples/multiled"><img alt="JLed in action" src="doc/jled.gif" width=256></a></td>
-  <td><a href="https://jandelgado.github.io/jled-wasm"><img alt="jled running in the browser" src="doc/jled-wasm.png" width=256></a>
-  </td>
- </tr>
-</table>
+JLed in action | Interactive JLed playground
+:-------------:|:--------------------------------------------------:
+<a href="examples/multiled"><img alt="breathing, blinking, fadeon and -off at the same time" height=200 src="doc/jled.gif"></a>|<a href="https://jandelgado.github.io/jled-wasm"><img alt="jled running in the browser" height=200  src="doc/jled-wasm.png"></a>
 
 ## Example
 
@@ -52,7 +39,6 @@ void loop() {
     * [Arduino IDE](#arduino-ide)
     * [PlatformIO](#platformio)
 * [Usage](#usage)
-        * [Output pipeline](#output-pipeline)
     * [Effects](#effects)
         * [Static on and off](#static-on-and-off)
             * [Static on example](#static-on-example)
@@ -65,8 +51,6 @@ void loop() {
         * [FadeOn](#fadeon)
             * [FadeOn example](#fadeon-example)
         * [FadeOff](#fadeoff)
-        * [Fade](#fade)
-            * [Fade example](#fade-example)
         * [User provided brightness function](#user-provided-brightness-function)
             * [User provided brightness function example](#user-provided-brightness-function-example)
         * [Delays and repetitions](#delays-and-repetitions)
@@ -80,13 +64,12 @@ void loop() {
             * [Immediate Stop](#immediate-stop)
         * [Misc functions](#misc-functions)
             * [Low active for inverted output](#low-active-for-inverted-output)
-            * [Minimum- and Maximum brightness level](#minimum--and-maximum-brightness-level)
+            * [Maximum brightness level](#maximum-brightness-level)
     * [Controlling a group of LEDs](#controlling-a-group-of-leds)
 * [Framework notes](#framework-notes)
 * [Platform notes](#platform-notes)
     * [ESP8266](#esp8266)
     * [ESP32](#esp32)
-        * [Using ESP-IDF](#using-esp-idf)
     * [STM32](#stm32)
         * [Arduino framework](#arduino-framework)
     * [Raspberry Pi Pico](#raspberry-pi-pico)
@@ -115,9 +98,7 @@ void loop() {
 * can control groups of LEDs sequentially or in parallel
 * Portable: Arduino, ESP8266, ESP32, Mbed, Raspberry Pi Pico and more platforms
   compatible, runs even in the [browser](https://jandelgado.github.io/jled-wasm)
-* supports Arduino, [mbed](https://www.mbed.com), [Raspberry Pi
-  Pico](https://github.com/raspberrypi/pico-sdk) and ESP32
-  [ESP-IDF](https://www.espressif.com/en/products/sdks/esp-idf) SDK's
+* supports Arduino, [mbed](https://www.mbed.com) and Raspberry Pi Pico SDKs
 * well [tested](https://coveralls.io/github/jandelgado/jled)
 
 ## Cheat Sheet
@@ -158,47 +139,22 @@ the only argument. Further configuration of the LED object is done using a fluen
 interface, e.g. `JLed led = JLed(13).Breathe(2000).DelayAfter(1000).Repeat(5)`.
 See the examples section below for further details.
 
-#### Output pipeline
-
-First the configured effect (e.g. `Fade`) is evaluated for the current time
-`t`. JLed internally uses unsigned bytes to represent brightness values,
-ranging from 0 to 255. Next, the value is scaled to the limits set by
-`MinBrightness` and `MaxBrightness` (optionally). When the effect is configured
-for a low-active LED using `LowActive`, the brightness value will be inverted,
-i.e., the value will be subtracted from 255. Finally the value is passed to the
-hardware abstraction, which might scale it to the resolution used by the actual
-device (e.g. 10 bits for an ESP8266). Finally the brightness value is written
-out to the configure GPIO.
-
-```
-┌───────────┐    ┌────────────┐    ┌─────────┐    ┌────────┐    ┌─────────┐    ┌────────┐
-│ Evaluate  │    │  Scale to  │    │  Low    │YES │ Invert │    │Scale for│    │Write to│
-│ effect(t) ├───►│ [min, max] ├───►│ active? ├───►│ signal ├───►│Hardware ├───►│  GPIO  │
-└───────────┘    └────────────┘    └────┬────┘    └────────┘    └───▲─────┘    └────────┘
-                                        │ NO                        │
-                                        └───────────────────────────┘
-```
-
 ### Effects
 
 #### Static on and off
 
-Calling `On(uint16_t period=1)` turns the LED on. To immediately turn a LED on,
-make a call like `JLed(LED_BUILTIN).On().Update()`. The `period` is optional
-and defaults to 1ms.
+Calling `On()` turns the LED on.  To immediately turn a LED on, make a call
+like `JLed(LED_BUILTIN).On().Update()`.
 
-`Off()` works like `On()`, except that it turns the LED off, i.e., it sets the
+`Off()` works like `On()`, except that it turns the LED off, i.e. it sets the
 brightness to 0.
 
-Use the `Set(uint8_t brightness, uint16_t period=1)` method to set the
-brightness to the given value, i.e., `Set(255)` is equivalent to calling `On()`
-and `Set(0)` is equivalent to calling `Off()`.
+Use the `Set(uint8_t brightness)` method to set the brightness to the given
+value, i.e. `Set(255)` is equivalent to calling `On()` and `Set(0)` is
+equivalent to calling `Off()`.
 
-Technically, `Set`, `On` and `Off` are effects with a default period of 1ms, that 
-set the brightness to a constant value. Specifying a different period has an
-effect on when the `Update()` method will be done updating the effect and 
-return false (like for any other effects). This is important when for example
-in a `JLedSequence` the LED should stay on for a given amount of time.
+Technically `Set`,  `On` and `Off` are effects with a period of 1ms that 
+set the brightness to a constant value.
 
 ##### Static on example
 
@@ -257,15 +213,6 @@ void loop() {
 }
 ```
 
-It is also possible to specify fade-on, on- and fade-off durations for the
-breathing mode to customize the effect.
-
-```c++
-// LED will fade-on in 500ms, stay on for 1000ms, and fade-off in 500ms.
-// It will delay for 1000ms afterwards and continue the pattern.
-auto led = JLed(13).Breathe(500, 1000, 500).DelayAfter(1000).Forever();
-```
-
 #### Candle
 
 In candle mode, the random flickering of a candle or fire is simulated. 
@@ -306,6 +253,7 @@ period 1000):
 
 [![fadeon function](doc/fadeon_plot.png)](https://www.wolframalpha.com/input/?i=plot+(exp(sin((t-1000%2F2.)*PI%2F1000))-0.36787944)*108.0++t%3D0+to+1000)
 
+
 ##### FadeOn example
 
 ```c++
@@ -325,32 +273,8 @@ void loop() {
 
 In FadeOff mode, the LED is smoothly faded off using PWM. The fade starts at
 100% brightness. Internally it is implemented as a mirrored version of the
-FadeOn function, i.e., FadeOff(t) = FadeOn(period-t).  The `FadeOff()` method
+FadeOn function, i.e. FadeOn(t) = FadeOff(period-t).  The `FadeOff()` method
 takes the period of the effect as argument.
-
-#### Fade
-
-The Fade effect allows to fade from any start value `from` to any target value
-`to` with the given duration. Internally it sets up a `FadeOn` or `FadeOff`
-effect and `MinBrightness` and `MaxBrightness` values properly. The `Fade`
-method take three arguments: `from`, `to` and `duration`.
-
-<a href="examples/fade_from_to"><img alt="fade from-to" src="doc/fade_from-to.png" height=200></a>
-
-##### Fade example
-
-```c++
-#include <jled.h>
-
-// fade from 100 to 200 with period 1000
-auto led = JLed(9).Fade(100, 200, 1000);
-
-void setup() { }
-
-void loop() {
-  led.Update();
-}
-```
 
 #### User provided brightness function
 
@@ -425,44 +349,30 @@ you want to start-over an effect.
 ##### Immediate Stop
 
 Call `Stop()` to immediately turn the LED off and stop any running effects.
-Further calls to `Update()` will have no effect, unless the Led is reset using
-`Reset()` or a new effect is activated. By default, `Stop()` sets the current
-brightness level to `MinBrightness`.
-
-`Stop()` takes an optional argument `mode` of type `JLed::eStopMode`:
-
-* if set to `JLed::eStopMode::KEEP_CURRENT`, the LEDs current level will be kept
-* if set to `JLed::eStopMode::FULL_OFF` the level of the LED is set to `0`,
-  regardless of what `MinBrightness` is set to, effectively turning the LED off
-* if set to `JLed::eStopMode::TO_MIN_BRIGHTNESS` (default behavior), the LED
-  will set to the value of `MinBrightness`
-
-```c++
-// stop the effect and set the brightness level to 0, regardless of min brightness
-led.Stop(JLed::eStopMode::FULL_OFF);
-```
+Further calls to `Update()` will have no effect unless the Led is reset (using
+`Reset()`) or a new effect activated.
 
 #### Misc functions
 
 ##### Low active for inverted output
 
 Use the `LowActive()` method when the connected LED is low active. All output
-will be inverted by JLed (i.e., instead of x, the value of 255-x will be set).
+will be inverted by JLed (i.e. instead of x, the value of 255-x will be set).
 
-##### Minimum- and Maximum brightness level
+##### Maximum brightness level
 
 The `MaxBrightness(uint8_t level)` method is used to set the maximum brightness 
 level of the LED. A level of 255 (the default) is full brightness, while 0 
-effectively turns the LED off. In the same way, the `MinBrightness(uint8_t level)`
-method sets the minimum brightness level. The default minimum level is 0. If
-minimum or maximum brightness levels are set, the output value is scaled to be
-within the interval defined by `[minimum brightness, maximum brightness]`: a
-value of 0 will be mapped to the minimum brightness level, a value of 255 will
-be mapped to the maximum brightness level.
+effectively turns the LED off.
 
 The `uint_8 MaxBrightness() const` method returns the current maximum 
-brightness level. `uint8_t MinBrightness() const` returns the current minimum
-brightness level.
+brightness level. Since currently only the upper 5 bits of the provided 
+brighness value are used, the lower 3 bits returned are always 0.
+
+If you want to programmatically increment or decrement the maximum brightness
+level, use the `JLed::kBrightnessStep` constant (which is defined as `1 <<
+(8-JLed::kBitsBrightness)` as the increment (instead of the hard wired value
+`8`) to be independent of the current JLed implementation using 5 bits.
 
 ### Controlling a group of LEDs
 
@@ -538,17 +448,16 @@ src_dir = examples/multiled_mbed
 
 The DAC of the ESP8266 operates with 10 bits, every value JLed writes out gets
 automatically scaled to 10 bits, since JLed internally only uses 8 bits.  The
-scaling methods make sure that min/max relationships are preserved, i.e., 0 is
+scaling methods make sure that min/max relationships are preserved, i.e. 0 is
 mapped to 0 and 255 is mapped to 1023. When using a user-defined brightness
 function on the ESP8266, 8-bit values must be returned, all scaling is done by
 JLed transparently for the application, yielding platform-independent code.
 
 ### ESP32
 
-When compiling for the ESP32, JLed uses `ledc` functions provided by the ESP32
-ESP-IDF SDK.  (See [esspressif
-documentation](https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/peripherals/ledc.html)
-for details).
+The ESP32 Arduino SDK does not provide an `analogWrite()` function. To
+be able to use PWM, we use the `ledc` functions of the ESP32 SDK.
+(See [esspressif documentation](https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/peripherals/ledc.html) for details).
 
 The `ledc` API connects so-called channels to GPIO pins, enabling them to use
 PWM. There are 16 channels available. Unless otherwise specified, JLed
@@ -562,28 +471,8 @@ auto esp32Led = JLed(jled::Esp32Hal(2, 7)).Blink(1000, 1000).Forever();
 
 The `jled::Esp32Hal(pin, chan)` constructor takes the pin number as the first
 argument and the ESP32 ledc channel number on the second position. Note that
-using the above-mentioned constructor results in non-platform independent code,
-so it should be avoided and is normally not necessary.
-
-For completeness, the full signature of the Esp32Hal constructor is
-
-```
-Esp32Hal(PinType pin, 
-         int chan = kAutoSelectChan, 
-         uint16_t freq = 5000,
-         ledc_timer_t timer = LEDC_TIMER_0)
-```
-
-which also allows to override the default frequency and timer used, when needed.
-
-#### Using ESP-IDF
-
-Since JLed uses the ESP-IDF SDK, JLed can also be directly used in ESP-IDF
-projects, without the need of using the Arduino Framework (which is also
-possible). See these repositories for example projects:
-
-* https://github.com/jandelgado/jled-esp-idf-example
-* https://github.com/jandelgado/jled-esp-idf-platformio-example
+using the above-mentioned constructor yields non-platform independent code, so
+it should be avoided and is normally not necessary.
 
 ### STM32
 
@@ -612,20 +501,14 @@ Example sketches are provided in the [examples](examples/) directory.
 * [Candle effect](examples/candle)
 * [Fade LED on](examples/fade_on)
 * [Fade LED off](examples/fade_off)
-* [Fade from-to effect](examples/fade_from_to)
-* [Pulse effect](examples/pulse)
 * [Controlling multiple LEDs in parallel](examples/multiled)
 * [Controlling multiple LEDs in parallel (mbed)](examples/multiled_mbed)
 * [Controlling multiple LEDs sequentially](examples/sequence)
 * [Simple User provided effect](examples/user_func)
 * [Morsecode example](examples/morse)
 * [Custom HAL example](examples/custom_hal)
-* [Custom PCA9685 HAL](https://github.com/jandelgado/jled-pca9685-hal)
-* [Dynamically switch sequences](https://github.com/jandelgado/jled-example-switch-sequence)
-* [JLed compiled to WASM and running in the browser](https://jandelgado.github.io/jled-wasm)
+* [JLed compiled for WASM and running in the browser](https://jandelgado.github.io/jled-wasm)
 * [Raspberry Pi Pico Demo](examples/raspi_pico)
-* [ESP32 ESP-IDF example](https://github.com/jandelgado/jled-esp-idf-example)
-* [ESP32 ESP-IDF PlatformIO example](https://github.com/jandelgado/jled-esp-idf-platformio-example)
 
 ### PlatformIO
 
@@ -693,8 +576,9 @@ Just 'reconfigure' the `JLed` with any of the effect methods (e.g. `FadeOn`,
 
 ## Author and Copyright
 
-Copyright 2017-2022 by Jan Delgado, jdelgado[at]gmx.net.
+Copyright 2017, 2018 by Jan Delgado, jdelgado[at]gmx.net.
 
 ## License
 
 [MIT](LICENSE)
+
