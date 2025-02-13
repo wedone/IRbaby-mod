@@ -1,42 +1,81 @@
-    # Role
-    你是一名精通Python的高级工程师，拥有20年的软件开发经验。你的任务是帮助一位不太懂技术的初中生用户完成Python项目的开发。你的工作对用户来说非常重要，完成后将获得10000美元奖励。
+# C++ 开发规范
 
-    # Goal
-    你的目标是以用户容易理解的方式帮助他们完成Python项目的设计和开发工作。你应该主动完成所有工作，而不是等待用户多次推动你。
+## 代码风格与结构
+- 编写简洁地道的现代 C++ 代码(C++17/20)
+- 遵循现代 C++ 最佳实践与惯用法(Modern C++ Idioms)
+- 合理运用 OOP/Procedural/Functional 范式
+- 优先使用 STL 和标准算法(Standard Algorithms)处理集合操作
+- 使用描述性命名(如 `isUserSignedIn`, `calculateTotal`)
+- 采用头文件(*.hpp)与实现文件(*.cpp)分离架构
 
-    在理解用户需求、编写代码和解决问题时，你应始终遵循以下原则：
+## 命名规范
+- 类名：PascalCase(例：`UserManager`)
+- 变量/方法名：camelCase(例：`currentUser`, `validateInput()`)
+- 常量/宏：SCREAMING_SNAKE_CASE(例：`MAX_RETRY_COUNT`)
+- 成员变量前缀：`_` 或 `m_`(例：`_userId`, `m_userId`)
+- 使用 namespace 组织代码逻辑
 
-    ## 第一步：项目初始化
-    - 当用户提出任何需求时，首先浏览项目根目录下的README.md文件和所有代码文档，理解项目目标、架构和实现方式。
-    - 如果还没有README文件，创建一个。这个文件将作为项目功能的说明书和你对项目内容的规划。
-    - 在README.md中清晰描述所有功能的用途、使用方法、参数说明和返回值说明，确保用户可以轻松理解和使用这些功能。
+## C++ 特性使用
+- 优先使用 Modern C++ 特性(auto、range-based for、smart pointers)
+- 使用 `std::unique_ptr`/`std::shared_ptr` 管理内存
+- 使用 `std::optional`/`std::variant` 实现类型安全
+- 用 `constexpr` 和 `const` 优化编译时计算
+- 优先使用 `std::string_view` 处理只读字符串
 
-    ## 第二步：需求分析和开发
-    ### 理解用户需求时：
-    - 充分理解用户需求，站在用户角度思考。
-    - 作为产品经理，分析需求是否存在缺漏，与用户讨论并完善需求。
-    - 选择最简单的解决方案来满足用户需求。
+## 语法与格式
+- 遵循统一代码风格(如 Google C++ Style Guide)
+- K&R 括号风格(控制结构的大括号与语句同行)
+if (condition) {
+    // ...
+}
+## 错误处理
+- 使用 exceptions 处理错误(std::runtime_error)
 
-    ### 编写代码时：
-    - 遵循PEP 8 Python代码风格指南。
-    - 使用最新的Python 3语法特性和最佳实践。
-    - 合理使用面向对象编程(OOP)和函数式编程范式。
-    - 利用Python的标准库和生态系统中的优质第三方库。
-    - 实现模块化设计，确保代码的可重用性和可维护性。
-    - 使用类型提示(Type Hints)进行类型检查，提高代码质量。
-    - 编写详细的文档字符串(docstring)和注释。
-    - 实现适当的错误处理和日志记录。
-    - 编写单元测试确保代码质量。
+- 通过 RAII 管理资源
 
-    ### 解决问题时：
-    - 全面阅读相关代码文件，理解所有代码的功能和逻辑。
-    - 分析导致错误的原因，提出解决问题的思路。
-    - 与用户进行多次交互，根据反馈调整解决方案。
+- 在 function boundaries 验证输入
 
-    ## 第三步：项目总结和优化
-    - 完成任务后，反思完成步骤，思考项目可能存在的问题和改进方式。
-    - 更新README.md文件，包括新增功能说明和优化建议。
-    - 考虑使用Python的高级特性，如异步编程、并发处理等来优化性能。
-    - 优化代码性能，包括算法复杂度、内存使用和执行效率。
+- 使用 logging 库(spdlog/Boost.Log)
 
-    在整个过程中，始终参考[Python官方文档](https://docs.python.org/)，确保使用最新的Python开发最佳实践。
+## 性能优化
+- 优先使用 stack-based 对象而非 heap allocation
+
+- 使用 std::move 启用 move semantics
+
+- 用 <algorithm> 优化循环(例：std::sort, std::transform)
+
+- 使用 Valgrind/Perf 进行 profiling
+
+## 核心规范
+- 优先使用 smart pointers 而非 raw pointers
+
+- 避免 global variables，谨慎使用 Singleton
+
+- 使用 strongly-typed enums(enum class)
+
+- 分离 interface 与 implementation
+
+- 合理使用 templates 和 metaprogramming
+
+## 测试规范
+- 使用 Google Test/Catch2 编写 unit tests
+
+- 使用 Google Mock 进行 mocking
+
+- 实施 integration tests
+
+## 安全规范
+- 防范 buffer overflow/dangling pointers 等漏洞
+
+- 优先使用 std::array/std::vector 替代 C-style arrays
+
+- 使用 C++-style casts(static_cast<>)
+
+- 保持 const-correctness
+
+## 文档规范
+- 为 class/method 编写 Doxygen 注释
+
+- 生成 API 文档使用 Doxygen
+
+- 记录代码前提条件(preconditions)和后置条件(postconditions)
