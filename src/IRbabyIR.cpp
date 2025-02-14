@@ -19,7 +19,7 @@ const uint16_t kCaptureBufferSize = 1024;
 static IRsend * ir_send = nullptr;
 static IRrecv * ir_recv = nullptr;
 bool saveSignal();
-
+bool saveDecodedSignal(String protocol, uint64_t code, uint16_t bits);
 void downLoadFile(String file)
 {
   HTTPClient http_client;
@@ -42,28 +42,84 @@ void downLoadFile(String file)
   http_client.end();
 }
 
+// bool sendIR(String file_name)
+// {
+//     String save_path = SAVE_PATH + file_name;
+//     if (LittleFS.exists(save_path))
+//     {
+//         File cache = LittleFS.open(save_path, "r");
+//         if (!cache)
+//         {
+//             ERRORF("Failed to open %s", save_path.c_str());
+//             return false;
+//         }
+//         Serial.println();
+//         uint16_t *data_buffer = (uint16_t *)malloc(sizeof(uint16_t) * 512);
+//         uint16_t length = cache.size() / 2;
+//         memset(data_buffer, 0x0, 512);
+//         INFOF("file size = %d\n", cache.size());
+//         INFOLN();
+//         cache.readBytes((char *)data_buffer, cache.size());
+//         ir_recv->disableIRIn();
+//         ir_send->sendRaw(data_buffer, length, 38);
+//         ir_recv->enableIRIn();
+//         free(data_buffer);
+//         cache.close();
+//         return true;
+//     }
+//     return false;
+// }
+
+
 bool sendIR(String file_name)
 {
     String save_path = SAVE_PATH + file_name;
-    if (LittleFS.exists(save_path))
-    {
+    if (LittleFS.exists(save_path)) {
         File cache = LittleFS.open(save_path, "r");
-        if (!cache)
-        {
+        if (!cache) {
             ERRORF("Failed to open %s", save_path.c_str());
             return false;
         }
-        Serial.println();
-        uint16_t *data_buffer = (uint16_t *)malloc(sizeof(uint16_t) * 512);
-        uint16_t length = cache.size() / 2;
-        memset(data_buffer, 0x0, 512);
-        INFOF("file size = %d\n", cache.size());
-        INFOLN();
-        cache.readBytes((char *)data_buffer, cache.size());
-        ir_recv->disableIRIn();
-        ir_send->sendRaw(data_buffer, length, 38);
-        ir_recv->enableIRIn();
-        free(data_buffer);
+
+        String content = cache.readString();
+        int sep1 = content.indexOf("|");
+        int sep2 = content.indexOf("|", sep1 + 1);
+        
+        if (sep1 > 0) { // 解码过的信号
+            String protocol = content.substring(0, sep1);
+            String code_str = content.substring(sep1 + 1, sep2);
+            uint16_t bits = content.substring(sep2 + 1).toInt();
+            uint64_t code = strtoull(code_str.c_str(), NULL, 16);
+
+            ir_recv->disableIRIn();
+            
+            if (protocol == "SAMSUNG")
+                ir_send->sendSAMSUNG(code, bits);
+            else if (protocol == "NEC")
+                ir_send->sendNEC(code, bits);
+            else if (protocol == "SONY")
+                ir_send->sendSony(code, bits);
+            else if (protocol == "RC5")
+                ir_send->sendRC5(code, bits);
+            else if (protocol == "RC6")
+                ir_send->sendRC6(code, bits);
+            else if (protocol == "JVC")
+                ir_send->sendJVC(code, bits);
+                
+            ir_recv->enableIRIn();
+        } else { // 原始信号
+            uint16_t *data_buffer = (uint16_t *)malloc(sizeof(uint16_t) * 512);
+            uint16_t length = cache.size() / 2;
+            memset(data_buffer, 0x0, 512);
+            cache.readBytes((char *)data_buffer, cache.size());
+            
+            ir_recv->disableIRIn();
+            ir_send->sendRaw(data_buffer, length, 38);
+            ir_recv->enableIRIn();
+            
+            free(data_buffer);
+        }
+        
         cache.close();
         return true;
     }
@@ -109,25 +165,112 @@ void sendStatus(String file, t_remote_ac_status status)
     }
 }
 
+// void recvIR()
+// {
+//     if (ir_recv->decode(&results))
+//     {
+//         DEBUGF("raw length = %d\n", results.rawlen - 1);
+//         String raw_data;
+//         for (int i = 1; i < results.rawlen; i++)
+//             raw_data += String(*(results.rawbuf + i) * kRawTick) + " ";
+//         ir_recv->resume();
+//         send_msg_doc.clear();
+//         send_msg_doc["cmd"] = "record_rt";
+//         send_msg_doc["params"]["signal"] = "IR";
+//         send_msg_doc["params"]["length"] = results.rawlen;
+//         send_msg_doc["params"]["value"] = raw_data.c_str();
+//         DEBUGLN(raw_data.c_str());
+//         sendUDP(&send_msg_doc, remote_ip);
+//         saveSignal();
+//     }
+// }
+
 void recvIR()
 {
-    if (ir_recv->decode(&results))
-    {
-        DEBUGF("raw length = %d\n", results.rawlen - 1);
-        String raw_data;
-        for (int i = 1; i < results.rawlen; i++)
-            raw_data += String(*(results.rawbuf + i) * kRawTick) + " ";
-        ir_recv->resume();
+    if (ir_recv->decode(&results)) {
+        String protocol;
+        uint64_t code = results.value;
+        
+        // 解码具体协议
+        switch(results.decode_type) {
+            case SAMSUNG:
+                protocol = "SAMSUNG";
+                break;
+            case NEC:
+                protocol = "NEC"; 
+                break;
+            case SONY:
+                protocol = "SONY";
+                break;
+            case RC5:
+                protocol = "RC5";
+                break;
+            case RC6:
+                protocol = "RC6"; 
+                break;
+            case JVC:
+                protocol = "JVC";
+                break;
+            default:
+                // 未知协议则使用原始数据
+                protocol = "RAW";
+                String raw_data;
+                for (int i = 1; i < results.rawlen; i++)
+                    raw_data += String(*(results.rawbuf + i) * kRawTick) + " ";
+                
+                send_msg_doc.clear();
+                send_msg_doc["cmd"] = "record_rt";
+                send_msg_doc["params"]["signal"] = "IR";
+                send_msg_doc["params"]["protocol"] = protocol;
+                send_msg_doc["params"]["length"] = results.rawlen;
+                send_msg_doc["params"]["value"] = raw_data;
+                sendUDP(&send_msg_doc, remote_ip);
+                ir_recv->resume();
+                saveSignal();
+                return;
+        }
+
+        // 发送解码后的数据
         send_msg_doc.clear();
         send_msg_doc["cmd"] = "record_rt";
         send_msg_doc["params"]["signal"] = "IR";
-        send_msg_doc["params"]["length"] = results.rawlen;
-        send_msg_doc["params"]["value"] = raw_data.c_str();
-        DEBUGLN(raw_data.c_str());
+        send_msg_doc["params"]["protocol"] = protocol;
+        send_msg_doc["params"]["bits"] = results.bits;
+        send_msg_doc["params"]["value"] = String(code, HEX);
+        
         sendUDP(&send_msg_doc, remote_ip);
-        saveSignal();
+        ir_recv->resume();
+        saveDecodedSignal(protocol, code, results.bits);
     }
 }
+
+
+
+//增加保存解码信号的函数:
+
+bool saveDecodedSignal(String protocol, uint64_t code, uint16_t bits)
+{
+    String save_path = SAVE_PATH;
+    save_path += "test";
+    
+    File cache = LittleFS.open(save_path, "w");
+    if (!cache) {
+        ERRORLN("Failed to create file");
+        return false;
+    }
+
+    // 保存协议类型和编码数据
+    cache.write((uint8_t*)protocol.c_str(), protocol.length());
+    cache.write((uint8_t*)"|", 1);
+    cache.write((uint8_t*)String(code, HEX).c_str(), String(code, HEX).length());
+    cache.write((uint8_t*)"|", 1);
+    cache.write((uint8_t*)String(bits).c_str(), String(bits).length());
+    
+    cache.close();
+    return true;
+}
+
+
 
 bool saveIR(String file_name)
 {

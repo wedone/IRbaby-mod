@@ -58,32 +58,32 @@
 
 #define SEND_RAW true
 
-#define DECODE_NEC false
-#define SEND_NEC false
+#define DECODE_NEC true
+#define SEND_NEC true
 
 #define DECODE_SHERWOOD false // Doesn't exist. Actually is DECODE_NEC
 #define SEND_SHERWOOD false
 
-#define DECODE_RC5 false
-#define SEND_RC5 false
+#define DECODE_RC5 true
+#define SEND_RC5 true
 
-#define DECODE_RC6 false
-#define SEND_RC6 false
+#define DECODE_RC6 true
+#define SEND_RC6 true
 
 #define DECODE_RCMM false
 #define SEND_RCMM false
 
-#define DECODE_SONY false
-#define SEND_SONY false
+#define DECODE_SONY true
+#define SEND_SONY true
 
 #define DECODE_PANASONIC false
 #define SEND_PANASONIC false
 
-#define DECODE_JVC false
-#define SEND_JVC false
+#define DECODE_JVC true
+#define SEND_JVC true
 
-#define DECODE_SAMSUNG false
-#define SEND_SAMSUNG false
+#define DECODE_SAMSUNG true
+#define SEND_SAMSUNG true
 
 #define DECODE_SAMSUNG_AC false
 #define SEND_SAMSUNG_AC false
