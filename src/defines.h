@@ -51,20 +51,20 @@ typedef unsigned char uint8_t;
 #endif // USE_SENSOR
 /* ----------------- default pin setting --------------- */
 /* reset pin */
-#define RESET_PIN 0
-#define LED_PIN   2
+#define RESET_PIN 4
+#define LED_PIN   15
 /* 315 RF pin */
-#define T_315 5
-#define R_315 4
+#define T_315 14
+#define R_315 5
 
 /* 433 RF pin */
 #define T_433 14
-#define R_433 12
+#define R_433 5
 
 /* IR pin */
 #define T_IR 14
-#define R_IR 12
+#define R_IR 5
 
 /* Sensor Pin*/
-#define SENSOR_PIN 0
+#define SENSOR_PIN 4
 #endif  // _DEFINES_H
